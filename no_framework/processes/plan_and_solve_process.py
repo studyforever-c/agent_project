@@ -1,6 +1,6 @@
-from src.planner import Planner
-from src.executor import Executor
-from src.llm import LLM
+from no_framework.src.planner import Planner
+from no_framework.src.executor import Executor
+from no_framework.src.llm import LLM
 from config import model_id_1
 
 llm = LLM(model_id_1)

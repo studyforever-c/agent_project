@@ -1,4 +1,4 @@
-from src.llm import LLM
+from no_framework.src.llm import LLM
 from tools_management import ToolsManagement
 from prompts import system_prompt_react
 

@@ -1,5 +1,5 @@
 from prompts import system_prompt_plan
-from src.llm import LLM
+from no_framework.src.llm import LLM
 import re
 
 
