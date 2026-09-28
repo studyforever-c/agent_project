@@ -1,5 +1,6 @@
 from llm import LLM
-from prompts import system_prompt_executor, user_prompt_executor
+from no_framework.prompts import system_prompt_executor
+
 
 class Executor:
 

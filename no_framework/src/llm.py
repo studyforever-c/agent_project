@@ -15,7 +15,7 @@ class LLM:
         except Exception as e:
             print(f'出错了:\n{e}')
         self.model_id = model_id
-    def generate(self, messages: list[dict]) -> str:
+    def generate(self, messages) -> str:
         try:
             completions = self.client.chat.completions.create(
                 model = self.model_id,

@@ -1,6 +1,6 @@
 from no_framework.src.llm import LLM
 from tools_management import ToolsManagement
-from prompts import system_prompt_react
+from no_framework.prompts import system_prompt_react
 
 import re
 class React:

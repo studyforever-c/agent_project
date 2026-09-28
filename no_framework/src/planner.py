@@ -1,4 +1,4 @@
-from prompts import system_prompt_plan
+from no_framework.prompts import system_prompt_plan
 from no_framework.src.llm import LLM
 import re
 

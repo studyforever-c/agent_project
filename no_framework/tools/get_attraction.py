@@ -1,5 +1,8 @@
 import os
 from tavily import TavilyClient
+from dotenv import load_dotenv
+
+load_dotenv()
 
 name = 'get_attraction'
 description = '根据城市名和当前天气推荐当地旅游景点。'
