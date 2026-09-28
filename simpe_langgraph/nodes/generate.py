@@ -1,6 +1,6 @@
-from state import State
-from prompts import failed_prompt, success_prompt
-from llm import LLM
+from simpe_langgraph.state import State
+from simpe_langgraph.prompts import failed_prompt, success_prompt
+from simpe_langgraph.llm import LLM
 from config import model_id_1
 
 llm = LLM(model_id_1, 0.2, True)

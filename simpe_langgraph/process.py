@@ -2,9 +2,9 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import InMemorySaver
 
 from state import State
-from nodes.generate import generate
-from nodes.tavily_search import tavily_search
-from nodes.understand import understand
+from simpe_langgraph.nodes.generate import generate
+from simpe_langgraph.nodes.tavily_search import tavily_search
+from simpe_langgraph.nodes.understand import understand
 def process():
     workflow = StateGraph(State)
 

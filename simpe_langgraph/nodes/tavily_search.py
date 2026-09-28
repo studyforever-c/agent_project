@@ -1,6 +1,6 @@
 from tavily import TavilyClient
 from dotenv import load_dotenv
-from state import State
+from simpe_langgraph.state import State
 import os
 
 load_dotenv()
