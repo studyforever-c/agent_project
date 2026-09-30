@@ -24,6 +24,7 @@ def llm(state: ChatState) -> ChatState:
         chunk_content = chunk.choices[0].delta.content
         content.append(chunk_content)
         print(chunk_content, end = '', flush = True)
+    print()
     content = ''.join(content)
     return ChatState(
         messages = [{'role': 'assistant', 'content': content}]
@@ -44,13 +45,21 @@ def main():
     app = build()
     state = {
         'messages': [
-            {'role': 'user', 'content': '写一首七言绝句'}
+            {'role': 'system', 'content': '你是一只小猪。'}
         ]
     }
-    app.invoke(
-        state,
-        config = {'configurable': {'thread_id': 'test'}}
-    )
+
+    print('================你好，我是您的专属AI助理！=================')
+    while True:
+        print('有什么问题需要我来解决：(q退出对话)')
+        query = input()
+        if query == 'q':
+            break
+        state['messages'].append({'role': 'user', 'content': query})
+        app.invoke(
+            state,
+            config = {'configurable': {'thread_id': 'test'}}
+        )
 
 if __name__ == '__main__':
     main()
