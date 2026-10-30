@@ -12,6 +12,7 @@
 
 
 ## 项目结构
+```text
 code_agent/
 ├── src/
 │   ├── __init__.py
@@ -41,7 +42,7 @@ code_agent/
 │       └── write.py
 ├── __init__.py         
 └── __main__.py         # 项目启动文件
-
+```
 
 ## 快速启动
 
