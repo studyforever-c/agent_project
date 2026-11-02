@@ -251,6 +251,7 @@ border_style = 'blue'
             continue
         if user_input == '/save':
             sid = save_session(agent.messages, config.model)
+            agent.permission.save(sid)
             console.print(f'[green]会话保存成功：{sid}[/green]')
             console.print(f'重启会话：code_agent -r {sid}')
             continue
@@ -356,7 +357,10 @@ def main():
     elif args.prompt:
         permission = Permission()
     else:
-        permission = Permission(ask = _ask_permission, persist_path = DEFAULT_STORE)
+        if args.resume:
+            permission = Permission(session_id = args.resume, ask = _ask_permission, persist_path = DEFAULT_STORE)
+        else:
+            permission = Permission(ask = _ask_permission, persist_path = DEFAULT_STORE)
 
     agent = Agent(
         llm = llm,

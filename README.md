@@ -9,6 +9,7 @@
 5. 在设置_SESSION_ID时学到了函数参数的默认值在函数定义时确定，save_session初始时希望把_SESSION_ID作为session_id的默认值（session_id: str|None = _SESSION_ID），之后通过改变_SESSION_ID的方式改变session_id，实测发现session_id并不会在之后随之改变。
 6. 在agent.py文件中，将每次chat获取tool_schema改为初始化时获取一次，之后每次chat都直接使用。
 7. 发现/save执行时缺少对_SESSION_ID的更新，对于一个新对话，多次保存还是会存多个文件，已改正。
+8. 只要在一次会话中将一个编辑型工具的权限设为always，之后任意会话该工具权限都为True，感觉不妥，改为只保存该会话自己的权限。
 
 
 ## 项目结构

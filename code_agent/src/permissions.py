@@ -16,18 +16,20 @@ class Permission:
     })
 
     def __init__(self,
+                 session_id: str|None = None,
                  ask = None, # 询问是否执行，为None时直接拒绝
                  allow_all: bool = False,
                  persist_path: Path|None = None):
+        self.session_id = session_id
         self.ask = ask
         self.allow_all = allow_all
         self._always: set[str] = set()
         self._persist_path = persist_path
 
-        if persist_path is not None:
+        if persist_path is not None and session_id is not None:
             try:
                 saved = json.loads(persist_path.read_text(encoding = 'utf-8'))
-                self._always = {t for t in saved.get('always', []) if isinstance(t, str)}
+                self._always = {t for t in saved.get(session_id, []) if isinstance(t, str)}
             except (OSError, ValueError, AttributeError):
                 # 意味着没有赋予任何权限
                 pass
@@ -47,7 +49,6 @@ class Permission:
         verdict = self.ask(tool_name, arguments)
         if verdict == 'always':
             self._always.add(tool_name)
-            self._save()
             return None
         elif verdict == 'once':
             return None
@@ -55,13 +56,15 @@ class Permission:
 拒绝执行：用户拒绝执行{tool_name}，不要再继续尝试了，问下一他们希望改成什么样
 """
 
-    def _save(self) -> None:
+    def save(self, session_id: str|None = None) -> None:
         if self._persist_path is None:
             return
+        if self.session_id:
+            session_id = self.session_id
         try:
             self._persist_path.parent.mkdir(parents = True, exist_ok = True)
             self._persist_path.write_text(
-                json.dumps({'always': sorted(self._always)}, indent = 2) + '\n', encoding = 'utf-8'
+                json.dumps({session_id: sorted(self._always)}, indent = 2) + '\n', encoding = 'utf-8'
             )
         except OSError:
             pass
