@@ -61,7 +61,7 @@ class Permission:
         try:
             self._persist_path.parent.mkdir(parents = True, exist_ok = True)
             self._persist_path.write_text(
-                json.dumps({'always': sorted(self._always)}, ident = 2) + '\n', encoding = 'utf-8'
+                json.dumps({'always': sorted(self._always)}, indent = 2) + '\n', encoding = 'utf-8'
             )
         except OSError:
             pass

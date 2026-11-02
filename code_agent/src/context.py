@@ -1,7 +1,21 @@
+"""
+管理上下文压缩
+三个压缩阶段：
+第一阶段，将所有工具调用结果的中间部分进行截断
+第二阶段，保留最近8条消息，将旧的上下文交由llm进行总结
+第三阶段，保留最近4条消息，将旧的上下文交由llm总结
+
+在第二、三阶段截取历史记录时，需确保保留下来的工具调用结果要与工具调用请求一一对应，
+否则可能出错
+当调用llm进行总结失败时，总结降级为手动总结，提取编辑过的文件和运行过程中出现的错误
+"""
+
 from __future__ import annotations
 import re
 from math import ceil
 from typing import TYPE_CHECKING
+
+from .prompt import SUMMARY_PROMPT
 
 if TYPE_CHECKING:
     from .llm import LLM
@@ -43,7 +57,7 @@ class ContextManager:
 
     @staticmethod
     def _snip_tool_outputs(messages: list[dict]) -> bool:
-        """阶段旧的工具调用结果"""
+        """截断旧的工具调用结果"""
         changed = False
         for msg in messages:
             if msg.get('role') != 'tool':
@@ -112,12 +126,7 @@ class ContextManager:
                 messages = [
                     {
                         'role': 'system',
-                        'content': '''
-                        你是一个擅长进行长文本总结的助理，把用户给的聊天记录文本进行精炼总结，
-                        注意事项：
-                        - 保留已编辑的文件路径，做出的关键决策，遇到的错误，当前任务状态。
-                        - 删除冗余的命令输出，代码清单，无意义的交流过程
-                        '''
+                        'content': SUMMARY_PROMPT
                     },
                     {'role': 'user', 'content': flatted[:15000]}
                 ]
