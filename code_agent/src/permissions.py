@@ -7,7 +7,7 @@
 import json
 from pathlib import Path
 
-DEFAULT_STORE = Path.home() / '.code-agent' / 'permissions.json'
+_PERMISSIONS_STORE = Path.home() / '.code-agent' / 'permissions.json'
 
 class Permission:
 
@@ -19,16 +19,15 @@ class Permission:
                  session_id: str|None = None,
                  ask = None, # 询问是否执行，为None时直接拒绝
                  allow_all: bool = False,
-                 persist_path: Path|None = None):
+                 ):
         self.session_id = session_id
         self.ask = ask
         self.allow_all = allow_all
         self._always: set[str] = set()
-        self._persist_path = persist_path
 
-        if persist_path is not None and session_id is not None:
+        if _PERMISSIONS_STORE.exists() and session_id is not None:
             try:
-                saved = json.loads(persist_path.read_text(encoding = 'utf-8'))
+                saved = json.loads(_PERMISSIONS_STORE.read_text(encoding = 'utf-8'))
                 self._always = {t for t in saved.get(session_id, []) if isinstance(t, str)}
             except (OSError, ValueError, AttributeError):
                 # 意味着没有赋予任何权限
@@ -57,13 +56,14 @@ class Permission:
 """
 
     def save(self, session_id: str|None = None) -> None:
-        if self._persist_path is None:
+        if not self._always:
             return
+
         if self.session_id:
             session_id = self.session_id
         try:
-            self._persist_path.parent.mkdir(parents = True, exist_ok = True)
-            self._persist_path.write_text(
+            _PERMISSIONS_STORE.parent.mkdir(parents = True, exist_ok = True)
+            _PERMISSIONS_STORE.write_text(
                 json.dumps({session_id: sorted(self._always)}, indent = 2) + '\n', encoding = 'utf-8'
             )
         except OSError:
