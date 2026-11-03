@@ -358,9 +358,9 @@ def main():
         permission = Permission()
     else:
         if args.resume:
-            permission = Permission(session_id = args.resume, ask = _ask_permission, persist_path = DEFAULT_STORE)
+            permission = Permission(session_id = args.resume, ask = _ask_permission)
         else:
-            permission = Permission(ask = _ask_permission, persist_path = DEFAULT_STORE)
+            permission = Permission(ask = _ask_permission)
 
     agent = Agent(
         llm = llm,
