@@ -9,6 +9,10 @@ from pathlib import Path
 
 _PERMISSIONS_STORE = Path.home() / '.code-agent' / 'permissions.json'
 
+saved = {}
+if _PERMISSIONS_STORE.exists():
+    saved = json.loads(_PERMISSIONS_STORE.read_text(encoding = 'utf-8'))
+
 class Permission:
 
     READ_ONLY = frozenset({
@@ -25,9 +29,8 @@ class Permission:
         self.allow_all = allow_all
         self._always: set[str] = set()
 
-        if _PERMISSIONS_STORE.exists() and session_id is not None:
+        if session_id is not None:
             try:
-                saved = json.loads(_PERMISSIONS_STORE.read_text(encoding = 'utf-8'))
                 self._always = {t for t in saved.get(session_id, []) if isinstance(t, str)}
             except (OSError, ValueError, AttributeError):
                 # 意味着没有赋予任何权限
@@ -63,8 +66,11 @@ class Permission:
             session_id = self.session_id
         try:
             _PERMISSIONS_STORE.parent.mkdir(parents = True, exist_ok = True)
+
+            global saved
+            saved[session_id] = sorted(self._always)
             _PERMISSIONS_STORE.write_text(
-                json.dumps({session_id: sorted(self._always)}, indent = 2) + '\n', encoding = 'utf-8'
+                json.dumps(saved, indent = 2) + '\n', encoding = 'utf-8'
             )
         except OSError:
             pass

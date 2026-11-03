@@ -14,7 +14,7 @@ from prompt_toolkit.key_binding import KeyBindings
 from . import __version__
 from .config import Config
 from .llm import LLM
-from .permissions import Permission, DEFAULT_STORE
+from .permissions import Permission
 from .agent import Agent
 from .session import load_session, list_session
 from .hooks import load_hooks

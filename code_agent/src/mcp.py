@@ -98,7 +98,7 @@ class MCPClient:
                     raise self._dead
                 left = deadline - time.monotonic()
                 if left < 0:
-                    raise MCPError(f'MCP服务器{self.name!r}没有在{timeout:g}时间内给出{method}的答案。')
+                    raise MCPError(f'MCP服务器{self.name!r}没有在{timeout:g}秒内给出{method}的答案。')
                 self._cond.wait(left)
             msg: dict = self._response.pop(req_id)
         if 'error' in msg:
