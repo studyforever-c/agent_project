@@ -1,5 +1,10 @@
 """
 posix命令无法在windows原生终端运行，需要使用git bash
+
+shell主要流程：
+1. 找git bash
+2. 若有git bash则将command转为posix格式，并使用git bash运行命令
+3. 若没有则尝试使用windows的cmd运行命令
 """
 import re
 import subprocess

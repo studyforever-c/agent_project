@@ -1,5 +1,5 @@
 """
-在工具调用前后执行钩子函数。每个人钩子函数都是一个
+在工具调用前后执行钩子函数。每个钩子函数都是一个
 Shell命令，将工具调用以JSON形式通过stdin传入。
 在工具调用之前的钩子函数可以通过返回码2给出是否调
 用模型，若不调用，stderr作为决定后返回给模型的理由。工具调用
@@ -31,7 +31,7 @@ def _fire(hook: dict, payload: dict):
         process = run_shell(
             hook['command'], # 要执行的shell命令
             check = False, # 出错不抛异常，防影响主进程，
-            input = json.dumps(payload),
+            input = json.dumps(payload, indent = 2, ensure_ascii = False) + '\n' ,
             capture_output = True, # 获取输出或退出码
             text = True, # 返回结果为字符串
             encoding = 'utf-8', # 防止输出为乱码
