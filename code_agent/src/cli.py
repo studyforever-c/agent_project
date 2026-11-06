@@ -19,7 +19,7 @@ from .agent import Agent
 from .session import load_session, list_session
 from .hooks import load_hooks
 from .mcp import load_mcp_tools
-from .session import save_session, set_session_id
+from .session import save_session
 from ..tools import ALL_TOOLS
 
 console = Console()
@@ -375,7 +375,6 @@ def main():
 
         if loaded:
             agent.messages, loaded_model = loaded
-            set_session_id(args.resume)
             # 除非在加载会话时手动更换模型，否则从已保存的会话中获取模型
             if not args.model:
                 agent.llm.model = loaded_model

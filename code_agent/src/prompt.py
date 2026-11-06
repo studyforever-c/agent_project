@@ -2,6 +2,8 @@
 import os
 import platform
 
+from ..tools.bash import get_tracked_cwd
+
 PLAN_MODE_PROMPT = """
 # 计划模式
 计划模式开启：用户需要制定计划，而不是立即执行更改。
@@ -30,27 +32,43 @@ SUMMARY_PROMPT = """
 
 输出格式：直接给出结构化摘要，不要调用任何工具。"""
 
-def system_prompt(tools) -> str:
-    cwd = os.getcwd()
-    tool_list = '\n'.join(
-        f'- `{t.name}`: {t.description}'
-        for t in tools
-    )
-    uname = platform.uname()
 
-    return f"""
+
+class SystemPrompt:
+
+    def __init__(self, tools):
+        self.tool_list = self._get_tool_list(tools)
+
+    @staticmethod
+    def _get_tool_list(tools) -> str:
+        tool_list = '\n'.join(
+            f'- `{t.name}`: {t.description}'
+            for t in tools
+        )
+        return f"""
+# 你可以使用的工具
+{tool_list}
+"""
+
+    @staticmethod
+    def _get_operating_environment():
+        uname = platform.uname()
+        cwd = os.getcwd()
+        return f"""
+# 当前运行环境
+- 工作目录：{cwd}
+- bash所在目录：{get_tracked_cwd() or cwd}
+- 操作系统：{uname.system} {uname.release} ({uname.machine})
+- Python: {platform.python_version()}
+"""
+
+    def get_full_prompt(self):
+        return f"""
 你是一个运行在用户终端的AI编程助手，请在回复
 时使用中文，你可以帮助用户进行软件工程相关工作，
 比如编写代码，修改bug，讲解代码，运行命令等。
-
-# 当前运行环境
-- 工作目录：{cwd}
-- 操作系统：{uname.system} {uname.release} ({uname.machine})
-- Python: {platform.python_version()}
-
-# 你可以使用的工具
-{tool_list}
-
+{self._get_operating_environment()} 
+{self.tool_list}
 # 注意事项
 1. 对文件进行改动之前需要先阅读文件。
 2. 仅修改部分文件时使用`edit_file`, `write_file`在需要创建新文件或覆盖原文件时使用。
@@ -62,4 +80,5 @@ def system_prompt(tools) -> str:
 8. 任何请求如果无法明确，需要先询问用户。
 9. 所有posix指令都优先运行在git bash中。
 10. 拒绝废话，不要做多余的事情。
-"""
+11. 在使用`bash`工具时参考bash目录，在使用其它工具时参考工作目录。
+12. 如非必要，不要使用绝对目录进行工作。"""

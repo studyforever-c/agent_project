@@ -1,7 +1,9 @@
 """
-只读工具直接执行
-需要编辑的文件需要人工确认
-无法寻求人工确认的问题直接拒绝
+permissions对外接口为check，save
+加载该文件时首先从指定文件中读取所有会话被赋予的权限
+当有工具请求时调用check，当工具为只读或在被赋予了永久权限的工具列表中则直接执行
+当项目以--prompt(-p)模式启动时，Permission实例化时没有传入ask，因此无法审批编辑型工具，被直接拒绝
+当审批工具请求时选择总是同意该工具执行，则工具名会被加入到always集合中，在保存会话时将always集合保存在权限文件中
 """
 
 import json
@@ -9,9 +11,9 @@ from pathlib import Path
 
 _PERMISSIONS_STORE = Path.home() / '.code-agent' / 'permissions.json'
 
-saved = {}
+_saved = {}
 if _PERMISSIONS_STORE.exists():
-    saved = json.loads(_PERMISSIONS_STORE.read_text(encoding = 'utf-8'))
+    _saved = json.loads(_PERMISSIONS_STORE.read_text(encoding = 'utf-8'))
 
 class Permission:
 
@@ -31,7 +33,7 @@ class Permission:
 
         if session_id is not None:
             try:
-                self._always = {t for t in saved.get(session_id, []) if isinstance(t, str)}
+                self._always = {t for t in _saved.get(session_id, []) if isinstance(t, str)}
             except (OSError, ValueError, AttributeError):
                 # 意味着没有赋予任何权限
                 pass
@@ -67,10 +69,11 @@ class Permission:
         try:
             _PERMISSIONS_STORE.parent.mkdir(parents = True, exist_ok = True)
 
-            global saved
-            saved[session_id] = sorted(self._always)
+            global _saved
+            # sorted()将集合转为列表并进行排序，确保之后的结果一致性
+            _saved[session_id] = sorted(self._always)
             _PERMISSIONS_STORE.write_text(
-                json.dumps(saved, indent = 2) + '\n', encoding = 'utf-8'
+                json.dumps(_saved, indent = 2) + '\n', encoding = 'utf-8'
             )
         except OSError:
             pass

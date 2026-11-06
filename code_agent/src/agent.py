@@ -22,7 +22,7 @@ import inspect
 import concurrent.futures
 from .llm import LLM
 from .context import ContextManager
-from .prompt import PLAN_MODE_PROMPT, system_prompt
+from .prompt import PLAN_MODE_PROMPT, SystemPrompt
 from ..tools.base import Tool
 from ..tools import ALL_TOOLS
 from ..tools import AgentTool
@@ -48,7 +48,7 @@ class Agent:
         self.messages: list[dict] = []
         self.context = ContextManager(max_tokens = max_context_tokens)
         self.max_rounds = max_rounds
-        self._system = system_prompt(self.tools)
+        self._system = SystemPrompt(self.tools)
         self.plan_mode = False # 计划模式通过命令行指令/plan开启，开启后，任何编辑文件的工具都将失效。
 
         # 连接子agent
@@ -59,7 +59,7 @@ class Agent:
         self._todo = next((t for t in self.tools if isinstance(t, TodoWriteTool)), None)
 
     def _full_messages(self) -> list[dict]:
-        system = self._system
+        system = self._system.get_full_prompt()
         if self.plan_mode:
             system += '\n\n' + PLAN_MODE_PROMPT
         if self._todo is not None:

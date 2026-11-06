@@ -1,12 +1,11 @@
 import os
-from pathlib import Path
 from dotenv import load_dotenv
 from dataclasses import dataclass
 
 
 @dataclass
 class Config:
-    model: str = 'qwen-max'
+    model: str = 'qwen3.8-2.4t-a95b'
     api_key: str = ''
     base_url: str|None = None
     max_tokens: int = 4096
@@ -19,7 +18,7 @@ class Config:
         load_dotenv()
 
         return cls(
-            model = os.getenv('MODEL', 'qwen-max'),
+            model = os.getenv('MODEL', 'qwen3.8-2.4t-a95b'),
             api_key = os.getenv("OPENAI_API_KEY") or os.getenv('DEEPSEEK_API_KEY') or '',
             base_url = os.getenv('OPENAI_BASE_URL', None),
             max_tokens = int(os.getenv("MAX_TOKENS", '4096')),
