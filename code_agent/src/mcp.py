@@ -1,5 +1,19 @@
 """
 mcp客户端
+获取mcp工具，其中每个工具都和普通工具的使用和管理方式一致
+
+主要流程：
+1. 创建一个可交互的子进程A，作为mcp服务器
+2. 创建一个线程，循环获取子进程A中带id的输出
+3. 重置mcp的response列表和状态
+4. 发送握手信号
+5. 获取工具列表
+
+注意事项：
+1. 发送请求、获取响应、修改mcp状态应在条件锁下进行
+2. 写管道应在普通锁下进行
+3. 握手信号收到响应后需向服务器发送通知
+4. 接收到的每条带id的响应都向所有客户端请求发送通知
 """
 
 import logging
@@ -17,7 +31,7 @@ from ..tools.base import Tool
 log = logging.getLogger(__name__)
 
 CONFIG_FILE = Path.home() / '.code-agent' / 'mcp.json'
-PROTOCOL_VERSION = "2025-06-18"
+PROTOCOL_VERSION = "2026-07-28"
 INIT_TIMEOUT = 15 # 初始化tools/call需要的时间
 CALL_TIMEOUT = 60 # 一次工具调用的时间
 
@@ -52,7 +66,7 @@ class MCPClient:
                 self._process.stdin.write(json.dumps(msg) + '\n')
                 self._process.stdin.flush()
         except OSError as e:
-            raise MCPError(f'MCP服务器{self.name!r}不可写：{e}') from e
+            raise MCPError(f'MCP服务器{self.name!r}不可写：{e}')
 
     def _notify(self, method: str):
         try:
@@ -98,7 +112,7 @@ class MCPClient:
                     raise self._dead
                 left = deadline - time.monotonic()
                 if left < 0:
-                    raise MCPError(f'MCP服务器{self.name!r}没有在{timeout:g}秒内给出{method}的答案。')
+                    raise MCPError(f'MCP服务器{self.name!r}没有在{timeout:g}秒内给出{method}的响应。')
                 self._cond.wait(left)
             msg: dict = self._response.pop(req_id)
         if 'error' in msg:
@@ -204,6 +218,7 @@ def load_mcp_tools(path: Path = CONFIG_FILE) -> list[Tool]:
     try:
         data = json.loads(path.read_text(encoding = 'utf-8'))
     except FileNotFoundError:
+        log.warning(f'mcp配置文件{path}不存在')
         return []
     except (json.JSONDecodeError, OSError) as e:
         log.warning(f'忽略{path}:{e}')

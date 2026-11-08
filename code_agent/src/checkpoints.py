@@ -1,5 +1,10 @@
 """
 会话内进行文件改动时的记录，以便后续进行撤销操作
+
+在进行存储之前，需将文件内容转为base64格式的字节串，再转为字符串
+读取时，再将base64格式字节串转为普通字节串
+
+任何文件在编辑前需要保存编辑之前的文件内容
 """
 
 import base64
@@ -11,7 +16,6 @@ CHECKPOINTS_FILE = Path.home() / '.code-agent' / 'checkpoints.json'
 # (路径， 改动前的内容，如果原文件不存在则为None)
 _stack: list[tuple[str, bytes|None]] = []
 _loaded = False
-
 def _ensure_loaded() -> None:
     global _loaded
     if _loaded:
@@ -28,6 +32,7 @@ def _ensure_loaded() -> None:
 
 def _save() -> None:
     entries = [
+        # decode('ascii')原因是json不能存储bytes类型数据
         {'path': path, 'prior': base64.b64encode(prior).decode('ascii') if prior is not None else None}
         for path, prior in _stack
     ]
@@ -62,8 +67,8 @@ def undo() -> str:
         recreated = not path.parent.exists()
         path.parent.mkdir(parents = True, exist_ok = True)
         path.write_bytes(prior)
-        msg = f"{path_str}已恢复。" + '' if not recreated else \
-             "（已重建父目录）"
+        msg = f"{path_str}已恢复。" + '' if not recreated else "（已重建父目录）"
+
     _save()
     return msg
 

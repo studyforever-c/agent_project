@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Config:
-    model: str = 'qwen3.8-2.4t-a95b'
+    model: str = 'deepseek-v4-pro-0813'
     api_key: str = ''
     base_url: str|None = None
     max_tokens: int = 4096
@@ -18,7 +18,7 @@ class Config:
         load_dotenv()
 
         return cls(
-            model = os.getenv('MODEL', 'qwen3.8-2.4t-a95b'),
+            model = os.getenv('MODEL', 'deepseek-v4-pro-0813'),
             api_key = os.getenv("OPENAI_API_KEY") or os.getenv('DEEPSEEK_API_KEY') or '',
             base_url = os.getenv('OPENAI_BASE_URL', None),
             max_tokens = int(os.getenv("MAX_TOKENS", '4096')),
