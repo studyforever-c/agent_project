@@ -112,7 +112,15 @@ def _update_cwd(command: str, current_cwd: str):
 
     # 删除命令中被括号包裹的命令，因为这些属于开一个子bash并在其中运行命令
     # 并不会影响主bash的目录
-    scrubbed = re.sub(r'\([^()]*\)', ' ',  command)
+    pre = None
+    scrubbed = command
+    while pre != scrubbed:
+        pre = scrubbed
+        scrubbed = re.sub(r'\([^()]*\)', ' ', scrubbed)
+
+    if not scrubbed.strip():
+        return
+
     running = current_cwd
     changed = False
     for words in _split_statements(scrubbed):
